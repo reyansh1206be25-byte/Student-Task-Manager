@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Classroom</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Top navigation bar -->
+  <nav class="navbar">
+    <span class="nav-title">Smart Classroom</span>
+    <label class="dark-toggle" title="Toggle dark mode">
+      <input type="checkbox" id="darkToggle" onchange="toggleDarkMode()" />
+      <span class="toggle-track">Dark</span>
+    </label>
+  </nav>
+
+  <!-- Tab buttons -->
+  <div class="tabs">
+    <button class="tab active" id="tabAttendance" onclick="switchTab('attendance')">Attendance</button>
+    <button class="tab" id="tabHomework" onclick="switchTab('homework')">Homework</button>
+    <button class="tab" id="tabAbout" onclick="switchTab('about')">About Us</button>
+  </div>
+
+  <!-- Page content -->
+  <div class="content">
+
+
+    <!-- ===========================
+         ATTENDANCE TRACKER
+         =========================== -->
+    <div id="attendanceTab" class="tab-panel">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-label">Total Subjects</span>
+          <span class="stat-number" id="totalSubjects">0</span>
+        </div>
+        <div class="stat-box green">
+          <span class="stat-label">Above 75%</span>
+          <span class="stat-number" id="safeCount">0</span>
+        </div>
+        <div class="stat-box red">
+          <span class="stat-label">Below 75%</span>
+          <span class="stat-number" id="riskCount">0</span>
+        </div>
+        <div class="stat-box blue">
+          <span class="stat-label">Average</span>
+          <span class="stat-number" id="overallAvg">--</span>
+        </div>
+      </div>
+
+      <!-- Add / Edit subject form -->
+      <div class="form-box" id="subjectFormBox">
+        <h2 class="form-title" id="formTitle">Add Subject</h2>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="subjectName">Subject Name</label>
+            <input type="text" id="subjectName" placeholder="e.g. Mathematics" />
+          </div>
+          <div class="field">
+            <label for="totalClasses">Total Classes</label>
+            <input type="number" id="totalClasses" placeholder="e.g. 40" min="0" />
+          </div>
+          <div class="field">
+            <label for="attendedClasses">Classes Attended</label>
+            <input type="number" id="attendedClasses" placeholder="e.g. 30" min="0" />
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button class="btn-blue" onclick="saveSubject()" id="saveSubjectBtn">Add Subject</button>
+          <button class="btn-grey" id="cancelSubjectBtn" onclick="cancelEdit()" style="display:none;">Cancel</button>
+        </div>
+
+        <p class="form-error" id="formError" style="display:none;"></p>
+      </div>
+
+      <!-- Subject list -->
+      <h3 class="list-heading">Your Subjects</h3>
+
+      <div id="noSubjects" class="empty-notice">
+        No subjects added yet. Use the form above to get started.
+      </div>
+
+      <div id="subjectList"></div>
+
+    </div><!-- end attendanceTab -->
+
+
+    <!-- ===========================
+         HOMEWORK TRACKER
+         =========================== -->
+    <div id="homeworkTab" class="tab-panel" style="display:none;">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-label">Total</span>
+          <span class="stat-number" id="hw-total">0</span>
+        </div>
+        <div class="stat-box red">
+          <span class="stat-label">Pending</span>
+          <span class="stat-number" id="hw-pending">0</span>
+        </div>
+        <div class="stat-box green">
+          <span class="stat-label">Completed</span>
+          <span class="stat-number" id="hw-completed">0</span>
+        </div>
+        <div class="stat-box orange">
+          <span class="stat-label">Overdue</span>
+          <span class="stat-number" id="hw-overdue">0</span>
+        </div>
+      </div>
+
+      <!-- Add / Edit homework form -->
+      <div class="form-box" id="hwFormBox">
+        <h2 class="form-title" id="hwFormTitle">Add Homework</h2>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="hwSubject">Subject</label>
+            <input type="text" id="hwSubject" placeholder="e.g. Physics" />
+          </div>
+          <div class="field">
+            <label for="hwTitle">Title</label>
+            <input type="text" id="hwTitle" placeholder="e.g. Chapter 5 notes" />
+          </div>
+          <div class="field">
+            <label for="hwDueDate">Due Date</label>
+            <input type="date" id="hwDueDate" />
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 14px;">
+          <label for="hwDesc">Notes (optional)</label>
+          <textarea id="hwDesc" rows="2" placeholder="Any extra details..."></textarea>
+        </div>
+
+        <div class="form-buttons">
+          <button class="btn-blue" onclick="saveHomework()" id="saveHwBtn">Add Homework</button>
+          <button class="btn-grey" id="cancelHwBtn" onclick="cancelHwEdit()" style="display:none;">Cancel</button>
+        </div>
+
+        <p class="form-error" id="hwFormError" style="display:none;"></p>
+      </div>
+
+      <!-- Filter buttons -->
+      <div class="filter-row">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" id="filter-all"       onclick="setFilter('all')">All</button>
+        <button class="filter-btn"        id="filter-pending"   onclick="setFilter('pending')">Pending</button>
+        <button class="filter-btn"        id="filter-completed" onclick="setFilter('completed')">Completed</button>
+        <button class="filter-btn"        id="filter-overdue"   onclick="setFilter('overdue')">Overdue</button>
+      </div>
+
+      <!-- Homework list -->
+      <h3 class="list-heading">Assignments</h3>
+
+      <div id="noHomework" class="empty-notice">
+        No homework added yet. Use the form above to add an assignment.
+      </div>
+
+      <div id="homeworkList"></div>
+
+    </div><!-- end homeworkTab -->
+
+
+    <!-- ===========================
+         ABOUT US
+         =========================== -->
+    <div id="aboutTab" class="tab-panel" style="display:none;">
+
+      <div class="about-section">
+
+        <div class="about-header">
+          <h2>About Us</h2>
+          <p>
+            Smart Classroom is a student project built to make it easier to track
+            attendance and manage homework in one place.
+          </p>
+        </div>
+
+        <div class="team-grid">
+
+          <!-- Developer 1 -->
+          <div class="team-card">
+            <div class="avatar-wrap">
+              <img src="photo1.jpeg" alt="Reyansh Gautam" class="avatar-photo"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+              <div class="avatar" style="display:none;">RG</div>
+            </div>
+            <div class="member-role developer-role">Developer</div>
+            <h3 class="member-name">Reyansh Gautam</h3>
+            <p class="member-edu">B.Tech, Computer Science and Engineering</p>
+            <hr class="card-line" />
+            <p class="member-bio">
+              Reyansh Gautam is a Computer Science and Engineering student who built
+              Smart Classroom to help students keep track of attendance and homework
+              without needing complicated tools.
+            </p>
+            <hr class="card-line" />
+            <div class="social-list">
+              <a href="https://instagram.com/reyansh.66" target="_blank" class="social-link instagram-link">
+                Instagram &nbsp; @reyansh.66
+              </a>
+              <div class="social-link coming-soon-link">
+                LinkedIn &nbsp; Coming Soon
+              </div>
+            </div>
+          </div>
+
+          <!-- Developer 2 -->
+          <div class="team-card">
+            <div class="avatar-wrap">
+              <img src="photo2.jpeg" alt="Priyansh Gauttam" class="avatar-photo"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+              <div class="avatar" style="display:none;">PG</div>
+            </div>
+            <div class="member-role developer-role">Developer</div>
+            <h3 class="member-name">Priyansh Gauttam</h3>
+            <p class="member-edu">B.Tech, Computer Science and Engineering</p>
+            <hr class="card-line" />
+            <p class="member-bio">
+              Priyansh Gauttam contributed to the Smart Classroom project and helped
+              improve the structure and overall functionality of the application.
+            </p>
+            <hr class="card-line" />
+            <div class="social-list">
+              <div class="social-link coming-soon-link">Instagram &nbsp; Coming Soon</div>
+              <div class="social-link coming-soon-link">LinkedIn &nbsp; Coming Soon</div>
+            </div>
+          </div>
+
+          <!-- Teacher / Guide -->
+          <div class="team-card teacher-card">
+            <div class="avatar-wrap">
+              <img src="photo3.jpeg" alt="Dr. Abishek Thakur" class="avatar-photo"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+              <div class="avatar teacher-avatar" style="display:none;">AT</div>
+            </div>
+            <div class="member-role guide-role">Project Guide</div>
+            <h3 class="member-name">Dr. Abishek Thakur</h3>
+            <p class="member-edu">Professor</p>
+            <hr class="card-line" />
+            <p class="member-bio">
+              Dr. Abishek Thakur guided the development of Smart Classroom,
+              providing mentorship and direction throughout the project to help the
+              team build a well-structured and useful academic tool.
+            </p>
+            <hr class="card-line" />
+            <div class="social-list">
+              <div class="social-link contact-note">Contact via Institution</div>
+            </div>
+          </div>
+
+        </div><!-- end team-grid -->
+
+        <p class="about-footer">Smart Classroom &nbsp;|&nbsp; 2025 &nbsp;|&nbsp; Student Project</p>
+
+      </div>
+    </div><!-- end aboutTab -->
+
+
+  </div><!-- end content -->
+
+  <script src="script.js"></script>
+</body>
+</html>
