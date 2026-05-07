@@ -1,16 +1,4 @@
-/*
-  Smart Classroom - script.js
-  Basic JavaScript only: variables, arrays, loops,
-  functions, if/else, localStorage.
-  No frameworks, no advanced methods.
-*/
 
-
-/* ==========================================
-   DARK MODE
-========================================== */
-
-// When the page loads, check if dark mode was saved and apply it
 function loadTheme() {
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
@@ -20,7 +8,6 @@ function loadTheme() {
 }
 loadTheme();
 
-// Called when the user clicks the dark mode checkbox
 function toggleDarkMode() {
   document.body.classList.toggle("dark");
   if (document.body.classList.contains("dark")) {
@@ -31,23 +18,18 @@ function toggleDarkMode() {
 }
 
 
-/* ==========================================
-   TAB SWITCHING
-========================================== */
 
-// Shows the selected tab panel and hides the others
 function switchTab(name) {
   // Hide all panels
   document.getElementById("attendanceTab").style.display = "none";
   document.getElementById("homeworkTab").style.display   = "none";
   document.getElementById("aboutTab").style.display      = "none";
 
-  // Remove active class from all tab buttons
+
   document.getElementById("tabAttendance").classList.remove("active");
   document.getElementById("tabHomework").classList.remove("active");
   document.getElementById("tabAbout").classList.remove("active");
 
-  // Show the right panel and mark the right button as active
   if (name === "attendance") {
     document.getElementById("attendanceTab").style.display = "block";
     document.getElementById("tabAttendance").classList.add("active");
@@ -65,9 +47,7 @@ function switchTab(name) {
 }
 
 
-/* ==========================================
-   ATTENDANCE DATA
-========================================== */
+
 
 // Load saved subjects from localStorage, or start with empty array
 var subjects = JSON.parse(localStorage.getItem("subjects")) || [];
@@ -77,25 +57,18 @@ function saveSubjects() {
   localStorage.setItem("subjects", JSON.stringify(subjects));
 }
 
-// Track which subject is being edited (-1 means we are adding, not editing)
+
 var editIndex = -1;
 
 
-/* ==========================================
-   ATTENDANCE FORM — Add or Edit a subject
-========================================== */
-
-// Called when the user clicks "Add Subject" or "Save Changes"
 function saveSubject() {
   var name     = document.getElementById("subjectName").value.trim();
   var total    = parseInt(document.getElementById("totalClasses").value);
   var attended = parseInt(document.getElementById("attendedClasses").value);
   var errBox   = document.getElementById("formError");
 
-  // Hide any old error first
   errBox.style.display = "none";
 
-  // Check the inputs are valid
   if (!name) {
     errBox.textContent = "Please enter a subject name.";
     errBox.style.display = "block";
@@ -133,7 +106,6 @@ function saveSubject() {
   updateAttendanceStats();
 }
 
-// Reset the form back to "Add" state
 function resetSubjectForm() {
   document.getElementById("subjectName").value    = "";
   document.getElementById("totalClasses").value   = "";
@@ -145,7 +117,6 @@ function resetSubjectForm() {
   editIndex = -1;
 }
 
-// Load a subject's data into the form for editing
 function editSubject(i) {
   var sub = subjects[i];
   document.getElementById("subjectName").value     = sub.name;
@@ -156,16 +127,12 @@ function editSubject(i) {
   document.getElementById("cancelSubjectBtn").style.display = "inline-block";
   document.getElementById("formError").style.display = "none";
   editIndex = i;
-  // Scroll to the form so the user can see it
   document.getElementById("subjectFormBox").scrollIntoView({ behavior: "smooth" });
 }
 
-// Cancel editing — go back to add mode
 function cancelEdit() {
   resetSubjectForm();
 }
-
-// Remove a subject from the list
 function deleteSubject(i) {
   if (confirm("Delete " + subjects[i].name + "? This cannot be undone.")) {
     subjects.splice(i, 1);
@@ -177,9 +144,6 @@ function deleteSubject(i) {
 }
 
 
-/* ==========================================
-   ATTENDANCE CALCULATIONS
-========================================== */
 
 // Calculate percentage: attended out of total
 function getPercent(attended, total) {
@@ -187,36 +151,25 @@ function getPercent(attended, total) {
   return (attended / total) * 100;
 }
 
-/*
-  How many classes must I attend in a row to reach 75%?
-  Formula: (attended + x) / (total + x) = 0.75
-  Solving for x: x = (3 * total - 4 * attended)
-*/
+
 function classesNeeded(attended, total) {
   var needed = 3 * total - 4 * attended;
   return Math.ceil(needed);
 }
 
-/*
-  How many classes can I skip and still stay at 75%?
-  Formula: attended / (total + x) = 0.75
-  Solving for x: x = (4 * attended - 3 * total) / 3
-*/
+
 function classesCanSkip(attended, total) {
   var skippable = (4 * attended - 3 * total) / 3;
   return Math.floor(skippable);
 }
 
 
-/* ==========================================
-   RENDER SUBJECT CARDS
-========================================== */
 
 function showSubjectList() {
   var list      = document.getElementById("subjectList");
   var noMsg     = document.getElementById("noSubjects");
 
-  // If there are no subjects, show the empty message
+ 
   if (subjects.length === 0) {
     noMsg.style.display = "block";
     list.innerHTML = "";
@@ -303,9 +256,6 @@ function showSubjectList() {
 }
 
 
-/* ==========================================
-   ATTENDANCE SUMMARY STATS
-========================================== */
 
 function updateAttendanceStats() {
   var total  = subjects.length;
@@ -344,18 +294,13 @@ function saveHomeworkData() {
   localStorage.setItem("homeworkList", JSON.stringify(homeworkList));
 }
 
-// Current active filter
+
 var activeFilter = "all";
 
-// Which homework item is being edited (-1 = none)
+
 var hwEditIndex = -1;
 
 
-/* ==========================================
-   HOMEWORK FORM — Add or Edit
-========================================== */
-
-// Called when the user clicks "Add Homework" or "Save Changes"
 function saveHomework() {
   var subject = document.getElementById("hwSubject").value.trim();
   var title   = document.getElementById("hwTitle").value.trim();
@@ -394,7 +339,6 @@ function saveHomework() {
   updateHwStats();
 }
 
-// Reset the homework form to "Add" state
 function resetHwForm() {
   document.getElementById("hwSubject").value   = "";
   document.getElementById("hwTitle").value     = "";
@@ -407,7 +351,7 @@ function resetHwForm() {
   hwEditIndex = -1;
 }
 
-// Load a homework entry into the form for editing
+
 function editHomework(i) {
   var hw = homeworkList[i];
   document.getElementById("hwSubject").value   = hw.subject;
@@ -422,12 +366,11 @@ function editHomework(i) {
   document.getElementById("hwFormBox").scrollIntoView({ behavior: "smooth" });
 }
 
-// Cancel editing
+
 function cancelHwEdit() {
   resetHwForm();
 }
 
-// Delete a homework entry
 function deleteHomework(i) {
   if (confirm("Delete \"" + homeworkList[i].title + "\"? This cannot be undone.")) {
     homeworkList.splice(i, 1);
@@ -438,7 +381,7 @@ function deleteHomework(i) {
   }
 }
 
-// Toggle a homework item between pending and completed
+
 function toggleDone(i) {
   homeworkList[i].completed = !homeworkList[i].completed;
   saveHomeworkData();
